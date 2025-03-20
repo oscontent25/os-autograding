@@ -17734,6 +17734,9 @@ const log = (text) => {
     process.stdout.write(text + os.EOL);
 };
 let resultPoints = {};
+function btoa(str) {
+  return Buffer.from(str).toString('base64')
+}
 exports.runAll = async (testConfig, cwd, testFile, scriptsPath) => {
     let points = 0;
     let availablePoints = 0;
@@ -17745,6 +17748,12 @@ exports.runAll = async (testConfig, cwd, testFile, scriptsPath) => {
     // const scriptPath = path.join(cwd, core.getInput('scriptPath'));
     let gradeFiles = fs_1.readdirSync(scriptPath);
     let details = "";
+    let myresult = {
+      version: 1,
+      status: 'pass',
+      max_score: 0,
+      tests:[]
+    }
     for (let i = 0; i < gradeFiles.length; i++) {
         if (gradeFiles[i] == testConfig.externalFile)
             continue;
@@ -17757,23 +17766,37 @@ exports.runAll = async (testConfig, cwd, testFile, scriptsPath) => {
             for (let key in result) {
                 points += result[key][0];
                 availablePoints += result[key][1];
+                let text1='';
                 if (result[key][0] == result[key][1]) {
-                    let text = `✅ ${key} pass`;
-                    log(color.green(text));
+                    text1 = `✅ ${key} pass`;
+                    log(color.green(text1));
                     // core.setOutput('details', text);
-                    details += `${text}\n`;
+                    details += `${text1}\n`;
                 }
                 else {
-                    let text = `❌ ${key} points ${result[key][0]}/${result[key][1]}`;
+                    text1 = `❌ ${key} points ${result[key][0]}/${result[key][1]}`;
                     // core.setOutput('details', text);
-                    log(color.red(text));
-                    details += `${text}\n`;
+                    log(color.red(text1));
+                    details += `${text1}\n`;
                 }
+                myresult.tests.push({
+                  name: key,
+                  status: result[key][0] == result[key][1] ? 'pass' : 'fail',
+                  score: result[key][0],
+                  message: text1,
+                  test_code: key,
+                  file_name: '',
+                  line_no: 0,
+                  duration: 0,
+                })
             }
         }
     }
+    myresult.max_score = availablePoints;
+
     // Output details
     core.setOutput('details', details);
+    core.setOutput('result', btoa(JSON.stringify(myresult)));
     // handle external result
     if (testConfig.externalFile) {
         let externalFile = await Promise.resolve().then(() => __importStar(require(path_1.default.join(scriptPath, testConfig.externalFile))));
