@@ -17779,16 +17779,18 @@ exports.runAll = async (testConfig, cwd, testFile, scriptsPath) => {
                     log(color.red(text1));
                     details += `${text1}\n`;
                 }
-                myresult.tests.push({
-                  name: key,
-                  status: result[key][0] == result[key][1] ? 'pass' : 'fail',
-                  score: result[key][0],
-                  message: text1,
-                  test_code: key,
-                  file_name: '',
-                  line_no: 0,
-                  duration: 0,
-                })
+                if (myresult.tests.length < 6){
+                  myresult.tests.push({
+                    name: key,
+                    status: result[key][0] == result[key][1] ? 'pass' : 'fail',
+                    score: result[key][0],
+                    message: text1,
+                    test_code: key,
+                    file_name: '',
+                    line_no: 0,
+                    duration: 0,
+                  })
+                }
             }
         }
     }
