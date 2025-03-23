@@ -17782,7 +17782,7 @@ exports.runAll = async (testConfig, cwd, testFile, scriptsPath) => {
                 myresult.tests.push({
                   name: key,
                   status: result[key][0] == result[key][1] ? 'pass' : 'fail',
-                  score: result[key][0],
+                  score: result[key][0] == result[key][1] ? 1 : 0,
                   message: text1,
                   test_code: key,
                   file_name: '',
